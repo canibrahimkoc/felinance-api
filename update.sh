@@ -5,20 +5,11 @@ set -e
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
+WHITE='\033[1;37m'
 
-
-log() {
-    echo -e "${NC}[$(date +'%Y-%m-%d %H:%M:%S')] $1${NC}"
-}
-
-success() {
-    echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')] $1${NC}"
-}
-
-error() {
-    echo -e "${RED}[$(date +'%Y-%m-%d %H:%M:%S')] HATA: $1${NC}" >&2
-    exit 1
-}
+log() { echo -e "${WHITE} $1${NC}"; }
+error() { echo -e "${RED}[$(date +'%Y-%m-%d %H:%M:%S')] $1${NC}" >&2; exit 1; }
+success() { echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')] $1${NC}"; }
 
 if [ ! -d ".git" ]; then
     error "Bu dizin bir Git deposu değil."
