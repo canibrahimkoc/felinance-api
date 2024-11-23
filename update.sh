@@ -27,7 +27,7 @@ else
     version="v${major_version}.${minor_version}"  # Sürüm numarasını oluştur
 fi
 
-LOCAL=$(git rev-parse HEAD)  # Lokal commit ID'sini al
+LOCAL=$(git rev-parse HEAD)  # Lokal commit ID'sini al 
 REMOTE=$(git rev-parse origin/main)  # Uzak main branch commit ID'sini al
 
 if [ "$LOCAL" != "$REMOTE" ]; then
