@@ -34,9 +34,9 @@ if [ "$current_branch" = "HEAD" ]; then
     current_branch="main"
 fi
 
-success "Git deposu güncelleniyor..."
+log "Git deposu güncelleniyor..."
 
-success "Remote değişiklikler kontrol ediliyor..."
+log "Remote değişiklikler kontrol ediliyor..."
 if ! git fetch --quiet origin $current_branch; then
     error "Uzak depodan veri çekilemedi. Remote URL'yi kontrol edin."
 fi
@@ -49,7 +49,7 @@ if [ -z "$LOCAL" ] || [ -z "$REMOTE" ]; then
 fi
 
 if [ "$LOCAL" != "$REMOTE" ]; then
-    success "Yeni güncellemeler mevcut, değişiklikler çekiliyor..."
+    log "Yeni güncellemeler mevcut, değişiklikler çekiliyor..."
     if ! git pull origin $current_branch; then
         error "Güncellemeler çekilemedi. Lütfen yerel değişiklikleri kontrol edin."
     fi
@@ -61,10 +61,10 @@ minor_version=$((commit_count % 10))
 version="v${major_version}.${minor_version}"
 
 if [[ $(git status --porcelain) ]]; then
-    success "Yerel değişiklikler tespit edildi..."
+    log "Yerel değişiklikler tespit edildi..."
     
     if ! git config user.name >/dev/null || ! git config user.email >/dev/null; then
-        success "Git kullanıcı bilgileri ayarlanıyor..."
+        log "Git kullanıcı bilgileri ayarlanıyor..."
         git config user.name "root"
         git config user.email "git@github.com"
     fi
@@ -85,7 +85,7 @@ if [[ $(git status --porcelain) ]]; then
         error "Değişiklikler uzak depoya gönderilemedi."
     fi
     
-    log "Değişiklikler başarıyla gönderildi. Yeni versiyon: $version"
+    success "Değişiklikler başarıyla gönderildi. Yeni versiyon: $version"
 else
-    log "Yerel değişiklik yok. Mevcut versiyon: $version"
+    success "Yerel değişiklik yok. Mevcut versiyon: $version"
 fi
