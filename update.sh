@@ -44,9 +44,13 @@ if [ "$LOCAL" != "$REMOTE" ]; then
 fi
 
 commit_count=$(git rev-list --count HEAD 2>/dev/null || echo "0")
-major_version=$((commit_count / 10))
-minor_version=$((commit_count % 10))
-version="v${major_version}.${minor_version}"
+
+# Versioning Logic: major.minor.patch
+major_version=$((commit_count / 100))  # 100 commit'ten bir ana sürüm artacak
+minor_version=$(( (commit_count / 10) % 10 ))  # 10 commit'ten bir küçük sürüm artacak
+patch_version=$((commit_count % 10))  # Her commit'te yama sürümü artacak
+
+version="v${major_version}.${minor_version}.${patch_version}"
 
 if [[ $(git status --porcelain) ]]; then
     log "Yerel değişiklikler tespit edildi..."
