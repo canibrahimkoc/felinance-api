@@ -1,6 +1,6 @@
 #!/bin/bash
 
-git_repo=$(git config --get remote.origin.url)  # Git reposunun URL'sini al
+git_repo=$(git config --get remote.origin.url) 
 git_url=$(pwd)  # Geçerli dizinin yolunu al
 
 cd "$git_url" || exit 1  # Git repo dizinine git, hata durumunda çık
