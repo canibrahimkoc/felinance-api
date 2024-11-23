@@ -1,6 +1,6 @@
 #!/bin/bash
 
-git_repo=$(git config --get remote.origin.url) 
+git_repo=$(git config --get remote.origin.url)  # Git reposunun URL'sini al
 git_url=$(pwd)  # Geçerli dizinin yolunu al
 
 cd "$git_url" || exit 1  # Git repo dizinine git, hata durumunda çık
@@ -32,7 +32,7 @@ REMOTE=$(git rev-parse origin/main)  # Uzak main branch commit ID'sini al
 
 if [ "$LOCAL" != "$REMOTE" ]; then
     echo "New version available, pulling updates..."
-    git pull origin main --no-edit  # Eğer farklı ise, güncellemeleri çek
+    git pull origin main --no-edit  # Uzak repo'dan main branch'ı çek
 else
     echo "You are on the latest version. $git_url $version"
 fi
