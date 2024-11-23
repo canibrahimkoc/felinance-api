@@ -8,6 +8,10 @@ NC='\033[0m'
 
 
 log() {
+    echo -e "${NC}[$(date +'%Y-%m-%d %H:%M:%S')] $1${NC}"
+}
+
+success() {
     echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')] $1${NC}"
 }
 
@@ -30,9 +34,9 @@ if [ "$current_branch" = "HEAD" ]; then
     current_branch="main"
 fi
 
-log "Git deposu güncelleniyor..."
+success "Git deposu güncelleniyor..."
 
-log "Remote değişiklikler kontrol ediliyor..."
+success "Remote değişiklikler kontrol ediliyor..."
 if ! git fetch --quiet origin $current_branch; then
     error "Uzak depodan veri çekilemedi. Remote URL'yi kontrol edin."
 fi
@@ -45,7 +49,7 @@ if [ -z "$LOCAL" ] || [ -z "$REMOTE" ]; then
 fi
 
 if [ "$LOCAL" != "$REMOTE" ]; then
-    log "Yeni güncellemeler mevcut, değişiklikler çekiliyor..."
+    success "Yeni güncellemeler mevcut, değişiklikler çekiliyor..."
     if ! git pull origin $current_branch; then
         error "Güncellemeler çekilemedi. Lütfen yerel değişiklikleri kontrol edin."
     fi
@@ -57,10 +61,10 @@ minor_version=$((commit_count % 10))
 version="v${major_version}.${minor_version}"
 
 if [[ $(git status --porcelain) ]]; then
-    log "Yerel değişiklikler tespit edildi..."
+    success "Yerel değişiklikler tespit edildi..."
     
     if ! git config user.name >/dev/null || ! git config user.email >/dev/null; then
-        log "Git kullanıcı bilgileri ayarlanıyor..."
+        success "Git kullanıcı bilgileri ayarlanıyor..."
         git config user.name "root"
         git config user.email "git@github.com"
     fi
