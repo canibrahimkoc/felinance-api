@@ -64,7 +64,11 @@ if [[ $(git status --porcelain) ]]; then
         git config user.name "root"
         git config user.email "git@github.com"
     fi
-    
+
+    if ! rm -f .git/index; then
+        error "Eski dosyalar silinemedi."
+    fi
+
     if ! git add .; then
         error "Değişiklikler eklenemedi."
     fi
