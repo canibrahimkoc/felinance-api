@@ -1,48 +1,94 @@
 #!/bin/bash
 
-git_repo=$(git config --get remote.origin.url)  # Git reposunun URL'sini al
-git_url=$(pwd)  # Geçerli dizinin yolunu al
+set -e  # Herhangi bir hata durumunda scripti durdur
 
-cd "$git_url" || exit 1  # Git repo dizinine git, hata durumunda çık
+# Renkli log mesajları için
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 
+# Fonksiyonlar
+log() {
+    echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')] $1${NC}"
+}
+
+error() {
+    echo -e "${RED}[$(date +'%Y-%m-%d %H:%M:%S')] HATA: $1${NC}" >&2
+    exit 1
+}
+
+# Git repo kontrolü
 if [ ! -d ".git" ]; then
-    git init  # Eğer Git repo'su yoksa başlat
+    error "Bu dizin bir Git deposu değil."
 fi
 
-git remote set-url origin "$git_repo"  # Uzak repo URL'sini ayarla
-
-if ! git show-ref --verify --quiet refs/heads/main; then
-    echo "Main branch does not exist. Creating it now..."
-    git checkout -b main  # Main branch yoksa oluştur
+# Remote URL'yi kontrol et ve ayarla
+remote_url=$(git config --get remote.origin.url || echo "")
+if [ -z "$remote_url" ]; then
+    error "Git remote URL ayarlanmamış. Lütfen 'git remote add origin <URL>' komutunu çalıştırın."
 fi
 
-git config pull.rebase false && git fetch origin  # Uzak repo'dan verileri çek
-commit_count=$(git rev-list --count HEAD)  # Toplam commit sayısını al
-
-if [ $commit_count -eq 0 ]; then
-    version="v0.1"  # İlk commitse v0.1
-else
-    major_version=$((commit_count / 10))
-    minor_version=$((commit_count % 10))
-    version="v${major_version}.${minor_version}"  # Sürüm numarasını oluştur
+# Branch kontrolü
+current_branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "main")
+if [ "$current_branch" = "HEAD" ]; then
+    current_branch="main"
 fi
 
-LOCAL=$(git rev-parse HEAD)  # Lokal commit ID'sini al
-REMOTE=$(git rev-parse origin/main)  # Uzak main branch commit ID'sini al
+log "Git deposu güncelleniyor..."
+
+# Uzak depodan değişiklikleri çek
+log "Remote değişiklikler kontrol ediliyor..."
+if ! git fetch origin $current_branch; then
+    error "Uzak depodan veri çekilemedi. Remote URL'yi kontrol edin."
+fi
+
+# Yerel ve uzak commit'leri karşılaştır
+LOCAL=$(git rev-parse HEAD 2>/dev/null || echo "")
+REMOTE=$(git rev-parse origin/$current_branch 2>/dev/null || echo "")
+
+if [ -z "$LOCAL" ] || [ -z "$REMOTE" ]; then
+    error "Branch bilgileri alınamadı."
+fi
 
 if [ "$LOCAL" != "$REMOTE" ]; then
-    echo "New version available, pulling updates..."
-    git fetch origin main && git merge origin/main  # Uzak repo'dan main branch'ı çek ve birleştir
-else
-    echo "You are on the latest version. $git_url $version"
+    log "Yeni güncellemeler mevcut, değişiklikler çekiliyor..."
+    if ! git pull origin $current_branch; then
+        error "Güncellemeler çekilemedi. Lütfen yerel değişiklikleri kontrol edin."
+    fi
 fi
 
+# Versiyon numarasını oluştur
+commit_count=$(git rev-list --count HEAD 2>/dev/null || echo "0")
+major_version=$((commit_count / 10))
+minor_version=$((commit_count % 10))
+version="v${major_version}.${minor_version}"
+
+# Yerel değişiklikleri kontrol et ve gönder
 if [[ $(git status --porcelain) ]]; then
-    echo "Local changes detected, committing..."
-    git add .  # Yerel değişiklikleri ekle
-    git commit -m "$version"  # Commit mesajı olarak sürüm numarasını kullan
-    git push origin main  # Değişiklikleri uzak repo'ya gönder
-    echo "Changes successfully pushed. New version: $git_url $version"
+    log "Yerel değişiklikler tespit edildi..."
+    
+    # Git kullanıcı bilgilerini kontrol et
+    if ! git config user.name >/dev/null || ! git config user.email >/dev/null; then
+        log "Git kullanıcı bilgileri ayarlanıyor..."
+        git config user.name "System Updater"
+        git config user.email "system@update.local"
+    fi
+    
+    if ! git add .; then
+        error "Değişiklikler eklenemedi."
+    fi
+    
+    if ! git commit -m "$version"; then
+        error "Commit oluşturulamadı."
+    fi
+    
+    if ! git push origin $current_branch; then
+        error "Değişiklikler uzak depoya gönderilemedi."
+    fi
+    
+    log "Değişiklikler başarıyla gönderildi. Yeni versiyon: $version"
 else
-    echo "No local changes. Current version: $git_url $version"
+    log "Yerel değişiklik yok. Mevcut versiyon: $version"
 fi
+
+log "İşlem başarıyla tamamlandı."
