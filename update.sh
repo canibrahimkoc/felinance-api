@@ -11,6 +11,8 @@ if [ ! -d ".git" ]; then
 fi
 
 remote_url=$(git config --get remote.origin.url || echo "")
+remote_title=$(basename $(git rev-parse --show-toplevel))
+
 if [ -z "$remote_url" ]; then
     error "Git remote URL ayarlanmamış. Lütfen 'git remote add origin <URL>' komutunu çalıştırın."
 fi
@@ -71,7 +73,7 @@ if [[ $(git status --porcelain) ]]; then
         error "Değişiklikler uzak depoya gönderilemedi."
     fi
     
-    success "Değişiklikler başarıyla gönderildi. Yeni versiyon: $pwd $version"
+    success "Değişiklikler başarıyla gönderildi. Yeni versiyon: $remote_title > $version"
 else
-    success "Yerel değişiklik yok. Mevcut versiyon: $pwd $version"
+    success "Yerel değişiklik yok. Mevcut versiyon: $remote_title > $version"
 fi
