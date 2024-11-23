@@ -85,7 +85,7 @@ if [[ $(git status --porcelain) ]]; then
         error "Değişiklikler uzak depoya gönderilemedi."
     fi
     
-    success "Değişiklikler başarıyla gönderildi. Yeni versiyon: $version"
+    success "Değişiklikler başarıyla gönderildi. Yeni versiyon: $pwd $version"
 else
-    success "Yerel değişiklik yok. Mevcut versiyon: $version"
+    success "Yerel değişiklik yok. Mevcut versiyon: $pwd $version"
 fi
