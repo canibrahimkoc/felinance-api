@@ -24,23 +24,47 @@ fi
 
 log "Git deposu güncelleniyor..."
 
-log "Remote değişiklikler kontrol ediliyor..."
-if ! git fetch --quiet origin $current_branch; then
-    error "Uzak depodan veri çekilemedi. Remote URL'yi kontrol edin."
-fi
-
-LOCAL=$(git rev-parse HEAD 2>/dev/null || echo "")
-REMOTE=$(git rev-parse origin/$current_branch 2>/dev/null || echo "")
-
-if [ -z "$LOCAL" ] || [ -z "$REMOTE" ]; then
-    error "Branch bilgileri alınamadı."
-fi
-
-if [ "$LOCAL" != "$REMOTE" ]; then
-    log "Yeni güncellemeler mevcut, değişiklikler çekiliyor..."
-    if ! git pull origin $current_branch; then
-        error "Güncellemeler çekilemedi. Lütfen yerel değişiklikleri kontrol edin."
+# Check if the remote branch exists
+if git ls-remote --exit-code --heads origin $current_branch >/dev/null 2>&1; then
+    log "Remote değişiklikler kontrol ediliyor..."
+    if ! git fetch --quiet origin $current_branch; then
+        error "Uzak depodan veri çekilemedi. Remote URL'yi kontrol edin."
     fi
+
+    LOCAL=$(git rev-parse HEAD 2>/dev/null || echo "")
+    REMOTE=$(git rev-parse origin/$current_branch 2>/dev/null || echo "")
+
+    if [ -z "$LOCAL" ] || [ -z "$REMOTE" ]; then
+        error "Branch bilgileri alınamadı."
+    fi
+
+    if [ "$LOCAL" != "$REMOTE" ]; then
+        log "Yeni güncellemeler mevcut, değişiklikler çekiliyor..."
+        if ! git pull origin $current_branch; then
+            error "Güncellemeler çekilemedi. Lütfen yerel değişiklikleri kontrol edin."
+        fi
+    fi
+else
+    log "Remote branch bulunamadı. İlk commit oluşturuluyor..."
+    if ! git config user.name >/dev/null || ! git config user.email >/dev/null; then
+        log "Git kullanıcı bilgileri ayarlanıyor..."
+        git config user.name "root"
+        git config user.email "git@github.com"
+    fi
+    
+    if ! git add .; then
+        error "Dosyalar eklenemedi."
+    fi
+    
+    if ! git commit -m "Initial commit"; then
+        error "İlk commit oluşturulamadı."
+    fi
+    
+    if ! git push -u origin $current_branch; then
+        error "İlk commit uzak depoya gönderilemedi."
+    fi
+    
+    success "İlk commit başarıyla oluşturuldu ve gönderildi."
 fi
 
 commit_count=$(git rev-list --count HEAD 2>/dev/null || echo "0")
