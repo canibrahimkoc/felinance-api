@@ -24,7 +24,6 @@ fi
 
 log "Git deposu güncelleniyor..."
 
-# Check if the remote branch exists
 if git ls-remote --exit-code --heads origin $current_branch >/dev/null 2>&1; then
     log "Remote değişiklikler kontrol ediliyor..."
     if ! git fetch --quiet origin $current_branch; then
