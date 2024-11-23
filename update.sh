@@ -33,7 +33,7 @@ fi
 log "Git deposu güncelleniyor..."
 
 log "Remote değişiklikler kontrol ediliyor..."
-if ! git fetch origin $current_branch; then
+if ! git fetch --quiet origin $current_branch; then
     error "Uzak depodan veri çekilemedi. Remote URL'yi kontrol edin."
 fi
 
@@ -85,5 +85,3 @@ if [[ $(git status --porcelain) ]]; then
 else
     log "Yerel değişiklik yok. Mevcut versiyon: $version"
 fi
-
-log "İşlem başarıyla tamamlandı."
