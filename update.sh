@@ -27,12 +27,12 @@ else
     version="v${major_version}.${minor_version}"  # Sürüm numarasını oluştur
 fi
 
-LOCAL=$(git rev-parse HEAD)  # Lokal commit ID'sini al 
+LOCAL=$(git rev-parse HEAD)  # Lokal commit ID'sini al
 REMOTE=$(git rev-parse origin/main)  # Uzak main branch commit ID'sini al
 
 if [ "$LOCAL" != "$REMOTE" ]; then
     echo "New version available, pulling updates..."
-    git pull origin main --no-edit  # Uzak repo'dan main branch'ı çek
+    git fetch origin main && git merge origin/main  # Uzak repo'dan main branch'ı çek ve birleştir
 else
     echo "You are on the latest version. $git_url $version"
 fi
